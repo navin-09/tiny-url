@@ -1,5 +1,6 @@
 package org.example.service;
 
+
 import lombok.Getter;
 import lombok.Setter;
 import org.example.model.URL;
@@ -7,6 +8,7 @@ import org.example.repository.URLRepo;
 import org.example.utils.Base62Encoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Getter
@@ -44,5 +46,18 @@ public class URLService {
         urlRepo.save(url);
 
         return paddedShortCode;
+    }
+
+    @Transactional
+    public void delete(String shortUrl) {
+        urlRepo.deleteByShortUrl(shortUrl);
+    }
+
+    public String getLongUrl(String shortUrl) {
+
+        return urlRepo.findByShortUrl(shortUrl)
+                .map(URL::getLongUrl)
+                .orElse(null);   // or throw custom exception
+
     }
 }

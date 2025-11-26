@@ -8,4 +8,5 @@ import lombok.Setter;
 @Setter
 public class RequestURLDto {
     private String long_url;
+    private String short_url;
 }

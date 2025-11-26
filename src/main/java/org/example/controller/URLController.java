@@ -30,13 +30,33 @@ public class URLController {
     }
 
     @DeleteMapping("/url")
-    public String deleteUrl(String shor_url) {
-        return "";
+    public String deleteUrl(@RequestBody RequestURLDto requestURLDto) {
+        try {
+            System.out.println("===>"+requestURLDto.getShort_url());
+            urlService.delete(requestURLDto.getShort_url());
+            return "url Successfully deleted";
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
-    @GetMapping("/url")
-    public String redirect(String short_url){
-        return "";
+
+    @GetMapping("/url/{shortUrl}")
+    public void redirect(@PathVariable("shortUrl") String shortUrl,
+                         jakarta.servlet.http.HttpServletResponse response) throws java.io.IOException {
+
+        String longUrl = urlService.getLongUrl(shortUrl);
+        System.out.println(longUrl);
+
+        if (longUrl == null) {
+            response.sendError(404, "Short URL not found");
+            return;
+        }
+
+        response.sendRedirect(longUrl);
     }
+
+
 
 }
