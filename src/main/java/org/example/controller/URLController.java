@@ -1,14 +1,15 @@
 package org.example.controller;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.example.dto.RequestURLDto;
 import org.example.dto.ResponseURLDto;
 import org.example.service.URLService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+@Getter
+@Setter
 @RestController
 public class URLController {
     @Autowired
@@ -20,9 +21,10 @@ public class URLController {
     }
 
     @PostMapping("/url")
-    public ResponseURLDto createUrl(RequestURLDto requestURLDto) {
+    public ResponseURLDto createUrl(@RequestBody RequestURLDto requestURLDto) {
         ResponseURLDto response = new ResponseURLDto();
-        String shortUrl  = urlService.createShortUrl(requestURLDto.getLong_url());
+        String long_url = requestURLDto.getLong_url();
+        String shortUrl  = urlService.createShortUrl(long_url);
         response.setShort_url(shortUrl);
         return response;
     }
