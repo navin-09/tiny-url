@@ -12,26 +12,33 @@ public class URLService {
     @Autowired
     private URLRepo urlRepo;
 
+    private String padTo7(String code) {
+        return String.format("%7s", code).replace(' ', '0');  // left-pad with '0'
+    }
+
     public String createShortUrl(String longUrl) {
 
         // 1) Check if URL already exists → idempotent
         URL existing = urlRepo.findByLongUrl(longUrl).orElse(null);
         if (existing != null) {
-            return existing.getShortUrl();   // return the same short URL again
+            return existing.getShortUrl();
         }
 
-        // 2) Create new record to generate ID
+        // 2) Create new row (to generate auto ID)
         URL url = new URL();
         url.setLongUrl(longUrl);
-        urlRepo.save(url);                   // auto-increment ID created here
+        urlRepo.save(url); // now url.getId() is generated
 
-        // 3) Convert ID → Base62
+        // 3) Encode ID → Base62
         String shortCode = Base62Encoder.encode(url.getId());
 
-        // 4) Update record with short code
-        url.setShortUrl(shortCode);
+        // 4) Pad to 7 characters
+        String paddedShortCode = padTo7(shortCode);
+
+        // 5) Update record
+        url.setShortUrl(paddedShortCode);
         urlRepo.save(url);
 
-        return shortCode;
+        return paddedShortCode;
     }
 }
