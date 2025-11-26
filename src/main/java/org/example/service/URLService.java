@@ -14,27 +14,24 @@ public class URLService {
 
     public String createShortUrl(String longUrl) {
 
-        // 1) Check if this long URL already exists (idempotent behavior)
-        return urlRepo.findByLongUrl(longUrl)
-                .map(URL::getShortUrl)          // if present → return existing short URL
-                .orElseGet(() -> {              // else → create new
+        // 1) Check if URL already exists → idempotent
+        URL existing = urlRepo.findByLongUrl(longUrl).orElse(null);
+        if (existing != null) {
+            return existing.getShortUrl();   // return the same short URL again
+        }
 
-                    // Step 2: save to get generated ID
-                    URL url = new URL();
-                    url.setLongUrl(longUrl);
-                    urlRepo.save(url);          // ID generated here
+        // 2) Create new record to generate ID
+        URL url = new URL();
+        url.setLongUrl(longUrl);
+        urlRepo.save(url);                   // auto-increment ID created here
 
-                    // Step 3: encode ID into Base62
-                    String shortCode = Base62Encoder.encode(url.getId());
+        // 3) Convert ID → Base62
+        String shortCode = Base62Encoder.encode(url.getId());
 
-                    // (optional) pad to fixed length, e.g., 7 chars
-                    // shortCode = String.format("%7s", shortCode).replace(' ', '0');
+        // 4) Update record with short code
+        url.setShortUrl(shortCode);
+        urlRepo.save(url);
 
-                    // Step 4: update the same row with shortCode
-                    url.setShortUrl(shortCode);
-                    urlRepo.save(url);
-
-                    return shortCode;
-                });
+        return shortCode;
     }
 }
